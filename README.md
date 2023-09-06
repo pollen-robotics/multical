@@ -1,4 +1,32 @@
-# multical 
+# Pollen Readme
+
+## Install
+```console
+$ pip install -e .
+```
+
+## Usage
+
+`<path_to_images>` est un dossier contenant les images pour la calibration. Il y a un dossier par caméra (par ex : `left` et `right`, ça marche avec plus de 2 caméras aussi).
+
+```console
+$ multical calibrate --image_path <path_to_images> --boards example_boards/pollen_charuco.yaml
+```
+
+Vérifier dans l'output de la console si les RMS des cams sont bonnes (i.e. < 1.0, plus c'est proche de 0. mieux c'est, en dessous de 1. c'est acceptable)
+
+```console
+...
+INFO - Calibrated left, with RMS <...>
+...
+INFO - Calibrated right, with RMS <...>
+...
+```
+
+Ca va créer des fichier `calibration<.json/.pkl/...>` dans `<path_to_images>`.
+
+
+# Multical original Readme
 
 
 Multi-camera calibration using one or more calibration patterns. 
