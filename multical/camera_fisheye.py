@@ -98,11 +98,11 @@ class CameraFisheye(Parameters):
         # object points + image points have to get reshaped (adding a dimension)
         objpoints = []
         for obp in points.object_points:
-            obp = obp[np.newaxis]
+            obp = np.expand_dims(obp, axis=0)
             objpoints.append(obp)
         corners = []
         for cor in points.corners:
-            cor = cor[np.newaxis]
+            cor = np.expand_dims(cor, axis=0)
             corners.append(cor)
         err, K, dist, _, _ = cv2.fisheye.calibrate(
             objpoints, corners, image_size, None, None, criteria=criteria, flags=flags
