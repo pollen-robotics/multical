@@ -194,31 +194,77 @@ class Workspace:
         check_detections(self.names.camera, self.boards, self.detected_points)
 
         info("Calibrating single cameras..")
-        if not isFisheye:
-            self.cameras, errs = calibrate_cameras(
-                self.boards,
-                self.detected_points,
-                self.image_size,
-                model=camera_model,
-                fix_aspect=fix_aspect,
-                has_skew=has_skew,
-                max_images=max_images,
-            )
-        else:
-            self.cameras, errs = calibrate_cameras_fisheye(
-                self.boards,
-                self.detected_points,
-                self.image_size,
-                model=camera_model,
-                fix_aspect=fix_aspect,
-                has_skew=has_skew,
-                max_images=max_images,
-            )
+        info("----------------------------")
+        # print(self.names.camera)
+        # print(self.image_size)
+        # print(max_images)
+        # exit()
 
+        # self.boards -> only one charuco board
+        # self.detected points = list of detected points for each camera
+        # if not isFisheye:
+        #     self.cameras, errs = calibrate_cameras(
+        #         self.boards,
+        #         self.detected_points,
+        #         self.image_size,
+        #         model=camera_model,
+        #         fix_aspect=fix_aspect,
+        #         has_skew=has_skew,
+        #         max_images=max_images,
+        #     )
+        # else:
+        #     self.cameras, errs = calibrate_cameras_fisheye(
+        #         self.boards,
+        #         self.detected_points,
+        #         self.image_size,
+        #         model=camera_model,
+        #         fix_aspect=fix_aspect,
+        #         has_skew=has_skew,
+        #         max_images=max_images,
+        #     )
+
+        fisheye_detected_points = []
+        fisheye_image_size = []
+        non_fisheye_detected_points = []
+        non_fisheye_image_size = []
+        for i in range(len(self.names.camera)):
+            if self.names.camera[i] in ["left", "right"]:
+                fisheye_detected_points.append(self.detected_points[i])
+                fisheye_image_size.append(self.image_size[i])
+            else:
+                non_fisheye_detected_points.append(self.detected_points[i])
+                non_fisheye_image_size.append(self.image_size[i])
+
+        fisheye_cameras, fisheye_errs = calibrate_cameras_fisheye(
+            self.boards,
+            fisheye_detected_points,
+            fisheye_image_size,
+            model=camera_model,
+            fix_aspect=fix_aspect,
+            has_skew=has_skew,
+            max_images=max_images,
+        )
+
+        non_fisheye_cameras, non_fisheye_errs = calibrate_cameras(
+            self.boards,
+            non_fisheye_detected_points,
+            non_fisheye_image_size,
+            model=camera_model,
+            fix_aspect=fix_aspect,
+            has_skew=has_skew,
+            max_images=max_images,
+        )
+
+        self.cameras = fisheye_cameras + non_fisheye_cameras
+        errs = fisheye_errs + non_fisheye_errs
+        self.cameras[2].dist = np.array([list(self.cameras[2].dist[0][:4])])
+        # print(self.cameras[2].dist)
+        # exit()
         for name, camera, err in zip(self.names.camera, self.cameras, errs):
             info(f"Calibrated {name}, with RMS={err:.2f}")
             info(camera)
-            info("")
+            info("=====")
+        # exit()
 
     def initialise_poses(
         self, motion_model=StaticFrames, camera_poses=None, isFisheye=False
